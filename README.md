@@ -26,4 +26,4 @@ You will need to take note of the LCD, DHT, and button pins:
 - Run `python app.py` as root.
 
 ## Example output
-![Example Output](EXPECTED.jpg)
+![Example Output](http://i.imgur.com/CuCOhof.jpg)
