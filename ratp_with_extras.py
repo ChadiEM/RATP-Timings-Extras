@@ -40,6 +40,27 @@ BUS_TIMES = {
 TRANSPORTS_TO_SHOW = [["22O", "52O"], ["M9M", "M9P"], ["PC1C", "PC1G"], ["32A", "32E"]]
 
 
+def get_page(url):
+    try:
+        f = urllib.urlopen(url)
+        html = f.read()
+        pattern = r'<td>(.*?)</td>'
+        hits = re.findall(pattern, html)
+        if len(hits) < 4:
+            hits = unavailable()
+        return hits
+    except:
+        return connect_issue()
+
+
+def unavailable():
+    return ["NAV", "NAV", "NAV", "NAV"]
+
+
+def connect_issue():
+    return ["UNC", "UNC", "UNC", "UNC"]
+
+
 class RATPWithExtras:
     def __init__(self, lcd_rs_pin, lcd_e_pin, lcd_db_pins, button_pin, dht_pin):
         # LCD
@@ -59,27 +80,6 @@ class RATPWithExtras:
         self.cur_transport = 0
         self.transports = TRANSPORTS_TO_SHOW[self.cur_transport]
 
-    @staticmethod
-    def get_page(url):
-        try:
-            f = urllib.urlopen(url)
-            html = f.read()
-            pattern = r'<td>(.*?)</td>'
-            hits = re.findall(pattern, html)
-            if len(hits) < 4:
-                hits = unavailable()
-            return hits
-        except:
-            return connect_issue()
-
-    @staticmethod
-    def unavailable():
-        return ["NAV", "NAV", "NAV", "NAV"]
-
-    @staticmethod
-    def connect_issue():
-        return ["UNC", "UNC", "UNC", "UNC"]
-
     def set_temp_if_there(self, temp, col, sign, length):
         temp_string = str(temp)
         if temp_string != "None":
@@ -94,10 +94,10 @@ class RATPWithExtras:
         self.lcd.message_at(row, 17, timings[3], LEN_TIME)
 
     def update_destinations_temperature(self):
-        next_first = self.get_page(BUS_TIMES[self.transports[0]])
+        next_first = get_page(BUS_TIMES[self.transports[0]])
         self.set_trans(next_first, BUS_LINE_1)
 
-        next_second = self.get_page(BUS_TIMES[self.transports[1]])
+        next_second = get_page(BUS_TIMES[self.transports[1]])
         self.set_trans(next_second, BUS_LINE_2)
 
         self.lcd.message_at(METADATA_LINE, 0, strftime("%H:%M"), LEN_CLOCK)

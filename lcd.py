@@ -33,7 +33,6 @@ class HD44780:
 
     # Internal
     def message(self, text):
-        print(text)
         for char in text:
             self.cmd(ord(char), True)
 
