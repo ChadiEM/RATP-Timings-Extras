@@ -30,6 +30,10 @@ def get_timings(returned_page_data):
         first_destination = "NDS"
         first_time = "NDS"
         second_time = "NDS"
+    elif first_destination == "DEVIATION" and second_destination == "ARRET NON DESSERVI":
+        first_destination = "Deviation"
+        first_time = "NDS"
+        second_time = "NDS"
     elif first_destination == "SERVICE TERMINE" or first_destination == "TERMINE" or second_destination == "TERMINE":
         first_destination = "TERMINE"
         first_time = ""
@@ -54,6 +58,7 @@ def friendly_destination(text):
     text = text.replace("Pont du", "P.")
     text = text.replace("Mairie de", "M.")
     text = text.replace("Mairie d'", "M. ")
+    text = text.replace("Saint", "St")
     return text
 
 
