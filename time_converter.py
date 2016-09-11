@@ -27,28 +27,24 @@ def get_timings(returned_page_data):
     second_time = lcd_friendly(returned_page_data[3])
 
     if first_destination == "ARRET NON DESSERVI":
-        first_destination = "NDS"
-        first_time = "NDS"
-        second_time = "NDS"
+        return TimingIssue("NDS")
     elif first_destination == "DEVIATION" and second_destination == "ARRET NON DESSERVI":
-        first_destination = "Deviation"
-        first_time = "NDS"
-        second_time = "NDS"
+        return TimingIssue("NDS - Deviation")
     elif first_destination == "SERVICE TERMINE" or first_destination == "TERMINE" or second_destination == "TERMINE":
-        first_destination = "TERMINE"
-        first_time = ""
-        second_time = ""
+        return TimingIssue("Termine")
     elif first_destination == "SERVICE NON COMMENCE" or first_destination == "NON COMMENCE" or second_destination == "NON COMMENCE":
-        first_destination = "NON COMMENCE"
-        first_time = ""
-        second_time = ""
-    elif second_destination == "DERNIER PASSAGE":
-        second_time = "DER"
-    else:
-        first_destination = friendly_destination(first_destination)
-        second_destination = friendly_destination(second_destination)
+        return TimingIssue("Non commence")
+    elif first_destination == "INFO INDISPO ...." and second_destination == "INFO INDISPO ....":
+        return TimingIssue("Indisponible")
 
-    return [first_destination, first_time, second_destination, second_time]
+    if second_destination == "DERNIER PASSAGE":
+        second_time = "DER"
+    elif second_destination == "PREMIER PASSAGE":
+        second_time = "PRE"
+
+    first_destination = friendly_destination(first_destination)
+
+    return RegularTimings(first_destination, first_time, second_time)
 
 
 def friendly_destination(text):
@@ -69,3 +65,15 @@ def lcd_friendly(text):
         return text.replace(" mn", "m").zfill(LEN_TIME)
     else:
         return "??m"
+
+
+class RegularTimings:
+    def __init__(self, first_destination, first_timing, second_timing):
+        self.first_destination = first_destination
+        self.first_timing = first_timing
+        self.second_timing = second_timing
+
+
+class TimingIssue:
+    def __init__(self, message):
+        self.message = message

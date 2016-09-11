@@ -18,6 +18,7 @@ LEN_SEPARATOR = 1
 LEN_TIME = 3
 LEN_DESTINATION_NUMBER = 3
 LEN_DESTINATION = 8
+LEN_SPACE = 1
 LEN_FULLLINE = 20
 
 METADATA_LINE = 0
@@ -86,12 +87,24 @@ class RATPWithExtras:
             temp_string = str(round(temp, 1))
             self.lcd.message_at(METADATA_LINE, col, temp_string + sign, length)
 
+    def set_humidity(self, temp, col, sign, length):
+        temp_string = str(temp)
+        if temp_string != "None":
+            temp_string = str(round(temp, 1))
+            self.lcd.message_at(METADATA_LINE, col, temp_string + sign, length)
+
     def set_trans(self, time, row):
         timings = time_converter.get_timings(time)
 
-        self.lcd.message_at(row, 4, timings[0], LEN_DESTINATION)
-        self.lcd.message_at(row, 13, timings[1], LEN_TIME)
-        self.lcd.message_at(row, 17, timings[3], LEN_TIME)
+        if isinstance(timings, time_converter.RegularTimings):
+            self.lcd.message_at(row, 4, timings.first_destination, LEN_DESTINATION)
+            self.lcd.message_at(row, 12, " ", LEN_SPACE)
+            self.lcd.message_at(row, 13, timings.first_timing, LEN_TIME)
+            self.lcd.message_at(row, 16, "/", LEN_SEPARATOR)
+            self.lcd.message_at(row, 17, timings.second_timing, LEN_TIME)
+        elif isinstance(timings, time_converter.TimingIssue):
+            self.lcd.message_at(row, 4, timings.message,
+                                LEN_DESTINATION + LEN_SPACE + LEN_TIME + LEN_SEPARATOR + LEN_TIME)
 
     def update_destinations_temperature(self):
         next_first = get_page(BUS_TIMES[self.transports[0]])
@@ -103,8 +116,16 @@ class RATPWithExtras:
         self.lcd.message_at(METADATA_LINE, 0, strftime("%H:%M"), LEN_CLOCK)
 
         humidity, temp = self.dht.get_temp_humidity()
-        self.set_temp_if_there(temp, 7, chr(223) + "C", LEN_TEMP)
-        self.set_temp_if_there(humidity, 15, "%", LEN_HUMIDITY)
+
+        temp_string = str(temp)
+        if temp_string != "None":
+            temp_string = str(round(temp, 1))
+            self.lcd.message_at(METADATA_LINE, 7, temp_string + chr(223) + "C", LEN_TEMP)
+
+        humidity_string = str(temp)
+        if humidity_string != "None":
+            humidity_string = str(round(temp, 1))
+            self.lcd.message_at(METADATA_LINE, 15, humidity_string + "%", LEN_HUMIDITY)
 
     def init_gpio(self):
         GPIO.setmode(GPIO.BCM)
@@ -124,9 +145,6 @@ class RATPWithExtras:
     def set_destinations(self):
         self.lcd.message_at(BUS_LINE_1, 0, self.transports[0][:-1], LEN_DESTINATION_NUMBER)
         self.lcd.message_at(BUS_LINE_2, 0, self.transports[1][:-1], LEN_DESTINATION_NUMBER)
-
-        self.lcd.message_at(BUS_LINE_1, 16, "/", LEN_SEPARATOR)
-        self.lcd.message_at(BUS_LINE_2, 16, "/", LEN_SEPARATOR)
 
         self.lcd.message_at(INTERMEDIATE_LINE, 0, "--------------------", LEN_FULLLINE)
 
