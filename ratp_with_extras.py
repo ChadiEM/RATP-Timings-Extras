@@ -122,9 +122,9 @@ class RATPWithExtras:
             temp_string = str(round(temp, 1))
             self.lcd.message_at(METADATA_LINE, 7, temp_string + chr(223) + "C", LEN_TEMP)
 
-        humidity_string = str(temp)
+        humidity_string = str(humidity)
         if humidity_string != "None":
-            humidity_string = str(round(temp, 1))
+            humidity_string = str(round(humidity, 1))
             self.lcd.message_at(METADATA_LINE, 15, humidity_string + "%", LEN_HUMIDITY)
 
     def init_gpio(self):
