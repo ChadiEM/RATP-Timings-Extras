@@ -26,7 +26,11 @@ def get_timings(returned_page_data):
     second_destination = returned_page_data[2]
     second_time = lcd_friendly(returned_page_data[3])
 
-    if first_destination == "ARRET NON DESSERVI":
+    if first_destination == "ARRET NON DESSERVI" and second_destination == "MANIFESTATION":
+        return TimingIssue("NDS - Manifestation")
+    elif first_destination == "INTERROMPU" and second_destination == "MANIFESTATION":
+        return TimingIssue("INT - Manifestation")
+    elif first_destination == "ARRET NON DESSERVI":
         return TimingIssue("NDS")
     elif first_destination == "DEVIATION" and second_destination == "ARRET NON DESSERVI":
         return TimingIssue("NDS - Deviation")
