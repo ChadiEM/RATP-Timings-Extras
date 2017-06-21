@@ -1,9 +1,3 @@
-#    if (time[0] == "ARRET NON DESSERVI" or time[0] == "MANIFESTATION"):
-#        reason = time[2]
-#        time = ["", "", "", ""]
-#        time[1] = reason
-#        time[3] = reason
-
 LEN_TIME = 3
 
 MAPPING_TEXT = {
@@ -21,34 +15,35 @@ MAPPING_TEXT = {
 
 def get_timings(returned_page_data):
     first_destination = returned_page_data[0]
-    first_time = lcd_friendly(returned_page_data[1])
+    first_time = returned_page_data[1]
+    first_time_parsed = lcd_friendly(first_time)
 
-    second_destination = returned_page_data[2]
-    second_time = lcd_friendly(returned_page_data[3])
+    second_time = returned_page_data[3]
+    second_time_parsed = lcd_friendly(second_time)
 
-    if first_destination == "ARRET NON DESSERVI" and second_destination == "MANIFESTATION":
+    if first_time == "ARRET NON DESSERVI" and second_time == "MANIFESTATION":
         return TimingIssue("NDS - Manifestation")
-    elif first_destination == "INTERROMPU" and second_destination == "MANIFESTATION":
+    elif first_time == "INTERROMPU" and second_time == "MANIFESTATION":
         return TimingIssue("INT - Manifestation")
-    elif first_destination == "ARRET NON DESSERVI":
+    elif first_time == "ARRET NON DESSERVI":
         return TimingIssue("NDS")
-    elif first_destination == "DEVIATION" and second_destination == "ARRET NON DESSERVI":
+    elif first_time == "DEVIATION" and second_time == "ARRET NON DESSERVI":
         return TimingIssue("NDS - Deviation")
-    elif first_destination == "SERVICE TERMINE" or first_destination == "TERMINE" or second_destination == "TERMINE":
+    elif first_time == "SERVICE TERMINE" or first_time == "TERMINE" or second_time == "TERMINE":
         return TimingIssue("Termine")
-    elif first_destination == "SERVICE NON COMMENCE" or first_destination == "NON COMMENCE" or second_destination == "NON COMMENCE":
+    elif first_time == "SERVICE NON COMMENCE" or first_time == "NON COMMENCE" or second_time == "NON COMMENCE":
         return TimingIssue("Non commence")
-    elif first_destination == "INFO INDISPO ...." and second_destination == "INFO INDISPO ....":
+    elif first_time == "INFO INDISPO ...." and second_time == "INFO INDISPO ....":
         return TimingIssue("Indisponible")
 
-    if second_destination == "DERNIER PASSAGE":
-        second_time = "DER"
-    elif second_destination == "PREMIER PASSAGE":
-        second_time = "PRE"
+    if second_time == "DERNIER PASSAGE":
+        second_time_parsed = "DER"
+    elif second_time == "PREMIER PASSAGE":
+        second_time_parsed = "PRE"
 
     first_destination = friendly_destination(first_destination)
 
-    return RegularTimings(first_destination, first_time, second_time)
+    return RegularTimings(first_destination, first_time_parsed, second_time_parsed)
 
 
 def friendly_destination(text):

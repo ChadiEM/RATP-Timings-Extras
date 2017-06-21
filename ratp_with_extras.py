@@ -9,6 +9,7 @@ from dht import DHT
 from lcd import HD44780
 
 import urllib
+import json
 
 # Length
 LEN_CLOCK = 5
@@ -27,29 +28,27 @@ BUS_LINE_1 = 2
 BUS_LINE_2 = 3
 
 BUS_TIMES = {
-    "22O": "http://www.ratp.fr/horaires/fr/ratp/bus/prochains_passages/PP/B22/22_24/A",
-    "52O": "http://www.ratp.fr/horaires/fr/ratp/bus/prochains_passages/PP/B52/52_20/A",
-    "M9M": "http://www.ratp.fr/horaires/fr/ratp/metro/prochains_passages/PP/ranelagh/9/A",
-    "M9P": "http://www.ratp.fr/horaires/fr/ratp/metro/prochains_passages/PP/ranelagh/9/R",
-    "70H": "http://www.ratp.fr/horaires/fr/ratp/bus/prochains_passages/PP/B70/70_3/R",
-    "PC1C": "http://www.ratp.fr/horaires/fr/ratp/bus/prochains_passages/PP/BPC1/PC1_4003_4064/A",
-    "PC1G": "http://www.ratp.fr/horaires/fr/ratp/bus/prochains_passages/PP/BPC1/PC1_4003_4064/R",
-    "32A": "http://www.ratp.fr/horaires/fr/ratp/bus/prochains_passages/PP/B32/32_77_83/A",
-    "32E": "http://www.ratp.fr/horaires/fr/ratp/bus/prochains_passages/PP/B32/32_77_83/R"
+    "22O": "https://api-ratp.pierre-grimaud.fr/v3/schedules/bus/22/ranelagh/A?_format=json",
+    "52O": "https://api-ratp.pierre-grimaud.fr/v3/schedules/bus/52/ranelagh/A?_format=json",
+    "M9M": "https://api-ratp.pierre-grimaud.fr/v3/schedules/metros/9/ranelagh/A?_format=json",
+    "M9P": "https://api-ratp.pierre-grimaud.fr/v3/schedules/metros/9/ranelagh/R?_format=json",
+    "32A": "https://api-ratp.pierre-grimaud.fr/v3/schedules/bus/32/porte_de_passy/A?_format=json",
+    "32E": "https://api-ratp.pierre-grimaud.fr/v3/schedules/bus/32/la_muette_boulainvilliers/R?_format=json"
 }
 
-TRANSPORTS_TO_SHOW = [["22O", "52O"], ["M9M", "M9P"], ["PC1C", "PC1G"], ["32A", "32E"]]
+TRANSPORTS_TO_SHOW = [["22O", "52O"], ["M9M", "M9P"], ["32A", "32E"]]
 
 
 def get_page(url):
     try:
         f = urllib.urlopen(url)
-        html = f.read()
-        pattern = r'<td>(.*?)</td>'
-        hits = re.findall(pattern, html)
-        if len(hits) < 4:
-            hits = unavailable()
-        return hits
+        output = f.read()
+        json_output = json.loads(output)
+        schedules = json_output['result']['schedules']
+        return [
+            schedules[0]['destination'].encode('utf-8'), schedules[0]['message'].encode('utf-8'),
+            schedules[1]['destination'].encode('utf-8'), schedules[1]['message'].encode('utf-8')
+        ]
     except:
         return connect_issue()
 
